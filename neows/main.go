@@ -1,10 +1,15 @@
 package main
 
 import (
+	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -13,21 +18,10 @@ import (
 	"github.com/o3labs/neo-transaction-watcher/neotx"
 	"github.com/o3labs/neo-transaction-watcher/neotx/network"
 
+	"github.com/o3labs/neo-utils/neoutils"
 	"github.com/o3labs/neo-utils/neoutils/neorpc"
 	"github.com/o3labs/neo-utils/neoutils/smartcontract"
 )
-
-//Settings here
-const (
-	websocketPort      = 8080
-	neoJSONRPCEndpoint = "http://seed1.o3node.org:10332"
-)
-
-var neoNodeConfig = neotx.Config{
-	Network:   neotx.NEOMainNet,
-	Port:      10333,
-	IPAddress: "seed1.o3node.org",
-}
 
 const (
 	maxMessageSize = 256
@@ -58,8 +52,51 @@ type WebSocketMessage struct {
 	Data interface{} `json:"data,omitempty"`
 }
 
-//Base on the article 10M Concurrent webcoket on https://goroutines.com/10m
+type Configuration struct {
+	WebsocketPort uint     `json:"websocketPort"`
+	SeedList      []string `json:"seedList"`
+	RPCSeedList   []string `json:"rpcSeedList"`
+	Magic         int      `json:"magic"` //network ID.
+}
+
+func loadConfigurationFile(file string) (Configuration, error) {
+	configuration := Configuration{}
+	configFile, err := os.Open(file)
+	defer configFile.Close()
+	if err != nil {
+		return configuration, err
+	}
+	jsonParser := json.NewDecoder(configFile)
+	jsonParser.Decode(&configuration)
+	return configuration, nil
+}
+
+//Base on the article 10M Concurrent websocket on https://goroutines.com/10m
 func main() {
+	mode := flag.String("network", "", "Network to connect to. main | test | private")
+	flag.Parse()
+
+	if *mode == "" {
+		//default mode is private
+		defaultEnv := "private"
+		mode = &defaultEnv
+	}
+
+	file := "config.privatenet.json"
+	if *mode == "main" {
+		file = "config.json"
+	} else if *mode == "test" {
+		file = "config.testnet.json"
+	}
+
+	fmt.Printf("Loading config file:%v\n", file)
+
+	config, err := loadConfigurationFile(file)
+	if err != nil {
+		fmt.Printf("Error loading config file: %v", err)
+		return
+	}
+	fmt.Printf("config %v", config)
 	go func() {
 		start := time.Now()
 		for {
@@ -68,7 +105,7 @@ func main() {
 		}
 	}()
 
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		ws, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
 			return
@@ -80,10 +117,10 @@ func main() {
 		go handleConnection(ws, channel)
 	})
 
-	go startConnectToSeed()
+	go startConnectToSeed(config)
 
-	port := fmt.Sprintf(":%d", websocketPort)
-	fmt.Printf("Websocket running at port %v\n", websocketPort)
+	port := fmt.Sprintf(":%d", config.WebsocketPort)
+	fmt.Printf("Websocket running at port %v\n", config.WebsocketPort)
 	if err := http.ListenAndServe(port, nil); err != nil {
 		log.Fatal(err)
 	}
@@ -152,21 +189,55 @@ func sendMessage(channel string, message WebSocketMessage) {
 	}
 }
 
+func getBestNode(list []string) *neoutils.SeedNodeResponse {
+	commaSeparated := strings.Join(list, ",")
+	return neoutils.SelectBestSeedNode(commaSeparated)
+}
+
 //this is NEO part
-func startConnectToSeed() {
-	err := neotx.Start(neoNodeConfig, onReceivedTX)
+func startConnectToSeed(config Configuration) {
+	first := config.SeedList[0]
+	host, port, err := net.SplitHostPort(first)
 	if err != nil {
-		log.Printf("%v", err)
+		fmt.Printf("%v", err)
+		os.Exit(-1)
+	}
+	portInt, err := strconv.Atoi(port)
+	if err != nil {
+		fmt.Printf("%v", err)
+		os.Exit(-1)
+	}
+	var neoNodeConfig = neotx.Config{
+		Network:   network.NEONetworkMagic(config.Magic),
+		Port:      uint16(portInt),
+		IPAddress: host,
+	}
+	client := neotx.NewClient(neoNodeConfig)
+	handler := &NEOConnectionHandler{}
+	handler.config = config
+
+	client.SetDelegate(handler)
+
+	err = client.Start()
+	if err != nil {
+		fmt.Printf("%v", err)
 		os.Exit(-1)
 	}
 }
 
-func onReceivedTX(tx neotx.TX) {
+type NEOConnectionHandler struct {
+	config Configuration
+}
+
+//implement the message protocol
+func (h *NEOConnectionHandler) OnReceive(tx neotx.TX) {
 
 	if tx.Type == network.InventotyTypeTX {
 		//Call getrawtransaction to get the transaction detail by txid
 
-		client := neorpc.NewClient(neoJSONRPCEndpoint)
+		best := getBestNode(h.config.RPCSeedList)
+
+		client := neorpc.NewClient(best.URL)
 		raw := client.GetRawTransaction(tx.ID)
 
 		if raw.ErrorResponse != nil {
@@ -177,7 +248,7 @@ func onReceivedTX(tx neotx.TX) {
 			TXID: tx.ID,
 			Data: raw,
 		}
-		log.Printf(" %v: %+v", tx.ID, raw.Result.Type)
+		fmt.Printf(" %v: %+v", tx.ID, raw.Result.Type)
 		if raw.Result.Type == "InvocationTransaction" {
 			parser := smartcontract.NewParserWithScript(raw.Result.Script)
 			result, err := parser.GetListOfScriptHashes()
@@ -186,7 +257,7 @@ func onReceivedTX(tx neotx.TX) {
 			}
 			for _, v := range result {
 
-				log.Printf("result = %v\n", v)
+				fmt.Printf("result = %v\n", v)
 			}
 		}
 		sendMessage(tx.Type.String(), m)
@@ -197,7 +268,14 @@ func onReceivedTX(tx neotx.TX) {
 		Type: tx.Type.String(),
 		TXID: tx.ID,
 	}
-	log.Printf("%+v", m)
+	fmt.Printf("%+v", m)
 	sendMessage(tx.Type.String(), m)
+}
 
+func (h *NEOConnectionHandler) OnConnected(c network.Version) {
+	fmt.Printf("connected %+v", c)
+}
+
+func (h *NEOConnectionHandler) OnError(e error) {
+	fmt.Printf("error %+v", e)
 }

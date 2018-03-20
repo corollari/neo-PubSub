@@ -4,5 +4,11 @@
 		"seed1.o3node.org:10333",
 		"seed2.o3node.org:10333",
 		"seed3.o3node.org:10333"
-	]
+	],
+	"rpcSeedList":[
+		"http://seed1.o3node.org:10332",
+		"http://seed2.o3node.org:10332",
+		"http://seed3.o3node.org:10332"
+	],
+	"magic":7630401
 }

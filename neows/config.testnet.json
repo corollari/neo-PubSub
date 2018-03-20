@@ -1,0 +1,14 @@
+{
+	"websocketPort": 8080,
+	"seedList": [
+		"seed1.neo.org:20333",
+		"seed2.neo.org:20333",
+		"seed3.neo.org:20333"
+	],
+	"rpcSeedList":[
+		"https://seed1.neo.org:20332",
+		"http://seed2.neo.org:20332",
+		"http://seed3.neo.org:20332"
+	],
+	"magic":1953787457
+}
