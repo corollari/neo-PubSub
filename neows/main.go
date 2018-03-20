@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -20,7 +21,6 @@ import (
 
 	"github.com/o3labs/neo-utils/neoutils"
 	"github.com/o3labs/neo-utils/neoutils/neorpc"
-	"github.com/o3labs/neo-utils/neoutils/smartcontract"
 )
 
 const (
@@ -71,6 +71,8 @@ func loadConfigurationFile(file string) (Configuration, error) {
 	return configuration, nil
 }
 
+var currentConfig Configuration
+
 //Base on the article 10M Concurrent websocket on https://goroutines.com/10m
 func main() {
 	mode := flag.String("network", "", "Network to connect to. main | test | private")
@@ -92,11 +94,14 @@ func main() {
 	fmt.Printf("Loading config file:%v\n", file)
 
 	config, err := loadConfigurationFile(file)
+
 	if err != nil {
 		fmt.Printf("Error loading config file: %v", err)
 		return
 	}
-	fmt.Printf("config %v", config)
+	//assign the current configuration to global
+	currentConfig = config
+
 	go func() {
 		start := time.Now()
 		for {
@@ -124,9 +129,10 @@ func main() {
 	if err := http.ListenAndServe(port, nil); err != nil {
 		log.Fatal(err)
 	}
-
 }
 
+//Handle websocket connection
+//Available channels are consensus,block and tx.
 func handleConnection(ws *websocket.Conn, channel string) {
 	sub := subscribe(channel)
 	atomic.AddInt64(&connected, 1)
@@ -194,6 +200,8 @@ func getBestNode(list []string) *neoutils.SeedNodeResponse {
 	return neoutils.SelectBestSeedNode(commaSeparated)
 }
 
+var connectedToNEONode = false
+
 //this is NEO part
 func startConnectToSeed(config Configuration) {
 	first := config.SeedList[0]
@@ -218,6 +226,7 @@ func startConnectToSeed(config Configuration) {
 
 	client.SetDelegate(handler)
 
+	fmt.Printf("connecting to %v:%v...\n", neoNodeConfig.IPAddress, neoNodeConfig.Port)
 	err = client.Start()
 	if err != nil {
 		fmt.Printf("%v", err)
@@ -249,17 +258,17 @@ func (h *NEOConnectionHandler) OnReceive(tx neotx.TX) {
 			Data: raw,
 		}
 		fmt.Printf(" %v: %+v", tx.ID, raw.Result.Type)
-		if raw.Result.Type == "InvocationTransaction" {
-			parser := smartcontract.NewParserWithScript(raw.Result.Script)
-			result, err := parser.GetListOfScriptHashes()
-			if err != nil {
-				return
-			}
-			for _, v := range result {
+		// if raw.Result.Type == "InvocationTransaction" {
+		// 	parser := smartcontract.NewParserWithScript(raw.Result.Script)
+		// 	result, err := parser.GetListOfScriptHashes()
+		// 	if err != nil {
+		// 		return
+		// 	}
+		// 	for _, v := range result {
 
-				fmt.Printf("result = %v\n", v)
-			}
-		}
+		// 		fmt.Printf("result = %v\n", v)
+		// 	}
+		// }
 		sendMessage(tx.Type.String(), m)
 		return
 	}
@@ -273,9 +282,19 @@ func (h *NEOConnectionHandler) OnReceive(tx neotx.TX) {
 }
 
 func (h *NEOConnectionHandler) OnConnected(c network.Version) {
-	fmt.Printf("connected %+v", c)
+	fmt.Printf("connected %+v\n", c)
+	connectedToNEONode = true
 }
 
 func (h *NEOConnectionHandler) OnError(e error) {
-	fmt.Printf("error %+v", e)
+	if e == io.EOF && connectedToNEONode == true {
+		connectedToNEONode = false
+		fmt.Printf("Disconnected from host. will try to connect in 15 seconds...")
+		for {
+			time.Sleep(15 * time.Second)
+			//we need to implement backoff and retry to reconnect here
+			//if the error is EOF then we try to reconnect
+			go startConnectToSeed(currentConfig)
+		}
+	}
 }
