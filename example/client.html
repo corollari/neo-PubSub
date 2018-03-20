@@ -1,0 +1,39 @@
+<html>
+<head>
+    <title>WebSocket for NEO transaction</title>
+</head>
+<body>
+    <div id="container"></div>
+
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            var ws;
+            if (window.WebSocket === undefined) {
+                $("#container").append("Your browser does not support WebSockets");
+                return;
+            } else {
+                ws = initWS();
+            }
+            function initWS() {
+                var socket = new WebSocket("ws://localhost:8080/ws?type=tx"),
+                    container = $("#container")
+                socket.onopen = function() {
+                    container.append("<p>Socket is open</p>");
+                };
+                socket.onmessage = function (e) {
+                    var c = document.getElementById("container");
+                    var div = document.createElement("span");
+                    div.innerHTML = "<p>" + e.data + "</p>";
+                    console.log(div);
+                    c.insertBefore(div,c.firstChild);
+                }
+                socket.onclose = function () {
+                    container.append("<p>Socket closed</p>");
+                }
+                return socket;
+            }
+        });
+    </script>
+</body>
+</html>

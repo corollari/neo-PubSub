@@ -1,0 +1,8 @@
+{
+	"websocketPort": 8080,
+	"seedList": [
+		"seed1.o3node.org:10333",
+		"seed2.o3node.org:10333",
+		"seed3.o3node.org:10333"
+	]
+}
