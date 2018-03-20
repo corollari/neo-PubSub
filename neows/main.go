@@ -116,7 +116,7 @@ func main() {
 			return
 		}
 
-		channel := r.URL.Query().Get("type")
+		channel := r.URL.Query().Get("channel")
 		// launch a new goroutine so that this function can return and the http server can free up
 		// buffers associated with this connection
 		go handleConnection(ws, channel)
