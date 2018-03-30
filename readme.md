@@ -4,6 +4,13 @@
 #### Under the hood
 It spins up a websocket server and uses [neo-transaction-watcher](https://github.com/O3Labs/neo-transaction-watcher) to connect to a NEO node that is connected to the NEO Network. whenever the NEO node broadcasts data to its connected clients. This client publishes the data to its subscribed clients by channel. 
 
+#### Dependencies
+```
+go get github.com/gorilla/websocket
+go get github.com/o3labs/neo-transaction-watcher
+go get github.com/o3labs/neo-utils/neoutils
+```
+
 #### Run
 ```bash
 go run main.go -network=[main|test|private]
