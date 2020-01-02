@@ -16,8 +16,8 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/o3labs/neo-transaction-watcher/neotx"
-	"github.com/o3labs/neo-transaction-watcher/neotx/network"
+	"github.com/corollari/neo-transaction-watcher/neotx"
+	"github.com/corollari/neo-transaction-watcher/neotx/network"
 
 	"github.com/corollari/neo-ws-pub-sub/neoutils"
 	"github.com/corollari/neo-ws-pub-sub/neorpc"

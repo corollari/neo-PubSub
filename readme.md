@@ -8,8 +8,8 @@ It spins up a websocket server and uses [neo-transaction-watcher](https://github
 #### Dependencies
 ```
 go get github.com/gorilla/websocket
-go get github.com/o3labs/neo-transaction-watcher
-go get github.com/o3labs/neo-utils/neoutils
+go get github.com/corollari/neo-transaction-watcher
+go get github.com/corollari/neo-utils/neoutils
 ```
 
 #### Run
