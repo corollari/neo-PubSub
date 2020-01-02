@@ -1,5 +1,6 @@
 # A simple WebSocket Pub/Sub server for NEO blockchain.
 
+[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
 
 #### Under the hood
 It spins up a websocket server and uses [neo-transaction-watcher](https://github.com/O3Labs/neo-transaction-watcher) to connect to a NEO node that is connected to the NEO Network. whenever the NEO node broadcasts data to its connected clients. This client publishes the data to its subscribed clients by channel. 

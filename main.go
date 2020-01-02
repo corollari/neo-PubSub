@@ -19,8 +19,8 @@ import (
 	"github.com/o3labs/neo-transaction-watcher/neotx"
 	"github.com/o3labs/neo-transaction-watcher/neotx/network"
 
-	"github.com/o3labs/neo-utils/neoutils"
-	"github.com/o3labs/neo-utils/neoutils/neorpc"
+	"github.com/corollari/neo-ws-pub-sub/neoutils"
+	"github.com/corollari/neo-ws-pub-sub/neorpc"
 )
 
 const (

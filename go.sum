@@ -1,0 +1,4 @@
+github.com/gorilla/websocket v1.4.1 h1:q7AeDBpnBk8AogcD4DSag/Ukw/KV+YhzLj2bP5HvKCM=
+github.com/gorilla/websocket v1.4.1/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
+github.com/o3labs/neo-transaction-watcher v0.0.0-20180426045406-e5202130a98c h1:hojTkK8+ISQqm0guXeo+yhoBFON4J+EfH0U5kH07jLk=
+github.com/o3labs/neo-transaction-watcher v0.0.0-20180426045406-e5202130a98c/go.mod h1:s3P7zKSiWqrUig0Pd42VBp65JzIMYx1QMy/9YIZ/vqE=
