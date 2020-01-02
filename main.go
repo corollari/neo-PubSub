@@ -76,6 +76,7 @@ var currentConfig Configuration
 //Base on the article 10M Concurrent websocket on https://goroutines.com/10m
 func main() {
 	mode := flag.String("network", "", "Network to connect to. main | test | private")
+	portInt := flag.Int("port", 8080, "Port to bind to")
 	flag.Parse()
 
 	if *mode == "" {
@@ -124,8 +125,8 @@ func main() {
 
 	go startConnectToSeed(config)
 
-	port := fmt.Sprintf(":%d", config.WebsocketPort)
-	fmt.Printf("Websocket running at port %v\n", config.WebsocketPort)
+	port := fmt.Sprintf(":%d", *portInt)
+	fmt.Printf("Websocket running at port %v\n", port)
 	if err := http.ListenAndServe(port, nil); err != nil {
 		log.Fatal(err)
 	}
