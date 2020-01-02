@@ -1,5 +1,5 @@
 {
-	"websocketPort": 8080,
+	"websocketPort": 80,
 	"seedList": [
 		"seed1.o3node.org:10333",
 		"seed2.o3node.org:10333",
