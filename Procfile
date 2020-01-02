@@ -1,1 +1,1 @@
-web: neo-ws-pub-sub -network=main
+web: bin/neo-ws-pub-sub -network=main
