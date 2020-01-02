@@ -1,9 +1,11 @@
 {
 	"websocketPort": 8080,
 	"seedList": [
-		"seed1.ngd.network:10332",
-		"seed2.ngd.network:10332",
-		"seed3.ngd.network:10332"
+		"seed1.ngd.network:10333",
+		"seed2.ngd.network:10333",
+		"seed3.ngd.network:10333",
+		"seed4.ngd.network:10333",
+		"seed5.ngd.network:10333"
 	],
 	"rpcSeedList":[
 		"http://seed1.ngd.network:10332",
