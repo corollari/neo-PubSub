@@ -81,7 +81,7 @@ func main() {
 
 	if *mode == "" {
 		//default mode is private
-		defaultEnv := "private"
+		defaultEnv := "main"
 		mode = &defaultEnv
 	}
 
