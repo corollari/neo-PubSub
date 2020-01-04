@@ -37,6 +37,22 @@ ws://localhost:8080/?channel=tx
 | block      | Block |
 | tx      | Transaction |
 
+### Heroku deployment
+```bash
+# See https://elements.heroku.com/buildpacks/heroku/heroku-buildpack-multi-procfile
+MAINNETAPP=neo-ws-pub-sub-mainnet
+TESTNETAPP=neo-ws-pub-sub-testnet
+heroku create -a $MAINNETAPP --region eu
+heroku create -a $TESTNETAPP --region eu
+heroku buildpacks:add -a $MAINNETAPP https://github.com/heroku/heroku-buildpack-multi-procfile
+heroku buildpacks:add -a $MAINNETAPP heroku/go
+heroku buildpacks:add -a $TESTNETAPP https://github.com/heroku/heroku-buildpack-multi-procfile
+heroku buildpacks:add -a $TESTNETAPP heroku/go
+heroku config:set -a $MAINNETAPP PROCFILE=ProcfileMainnet
+heroku config:set -a $TESTNETAPP PROCFILE=ProcfileTestnet
+git push https://git.heroku.com/$MAINNETAPP.git HEAD:master
+git push https://git.heroku.com/$TESTNETAPP.git HEAD:master
+```
 
 #### Example
 See `example/client.html`
