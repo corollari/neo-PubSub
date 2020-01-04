@@ -295,10 +295,12 @@ func (h *NEOConnectionHandler) OnError(e error) {
 		connectedToNEONode = false
 		fmt.Printf("Disconnected from host. will try to connect in 15 seconds...")
 		for {
-			time.Sleep(15 * time.Second)
+			time.Sleep(2 * time.Second)
 			//we need to implement backoff and retry to reconnect here
 			//if the error is EOF then we try to reconnect
 			go startConnectToSeed(currentConfig)
 		}
+	} else {
+		os.Exit(1);
 	}
 }
