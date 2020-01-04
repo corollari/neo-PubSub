@@ -246,6 +246,9 @@ func (h *NEOConnectionHandler) OnReceive(tx neotx.TX) {
 		//Call getrawtransaction to get the transaction detail by txid
 
 		best := getBestNode(h.config.RPCSeedList)
+		if best == nil {
+			return
+		}
 
 		client := neorpc.NewClient(best.URL)
 		raw := client.GetRawTransaction(tx.ID)
