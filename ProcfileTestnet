@@ -1,0 +1,1 @@
+web: bin/neo-ws-pub-sub -network=test -port=$PORT
