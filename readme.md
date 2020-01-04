@@ -54,6 +54,10 @@ git push https://git.heroku.com/$MAINNETAPP.git HEAD:master
 git push https://git.heroku.com/$TESTNETAPP.git HEAD:master
 ```
 
+Afterwards the following changes can be made manually from heroku's dashboard:
+- Change dyno type from Free to Hobby in order to get continuous uptime & SSL certificates
+- Connect the heroku apps to a github repo in order to enable automatic deploys
+
 #### Example
 See `example/client.html`
 
