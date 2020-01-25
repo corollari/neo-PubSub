@@ -8,6 +8,7 @@
 		"seed1.ngd.network:20333"
 	],
 	"rpcSeedList":[
+		"https://test.neologin.io:443",
 		"https://test1.cityofzion.io:443",
 		"http://seed1.ngd.network:20332",
 		"https://test2.cityofzion.io:443",
@@ -23,5 +24,6 @@
 		"http://seed8.ngd.network:20332",
 		"http://seed9.ngd.network:20332"
 	],
+	"websocketEventsProvider": "ws://test.neologin.io:8000/",
 	"magic":1953787457
 }

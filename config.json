@@ -1,7 +1,7 @@
 {
 	"websocketPort": 8080,
 	"seedList": [
-		"54.171.79.186:10333",
+		"main.neologin.io:10333",
 		"seed5.ngd.network:10333",
 		"seed4.ngd.network:10333",
 		"seed3.ngd.network:10333",
@@ -9,6 +9,7 @@
 		"seed1.ngd.network:10333"
 	],
 	"rpcSeedList":[
+		"https://main.neologin.io:443",
 		"http://seed1.ngd.network:10332",
 		"https://seed1.cityofzion.io:443",
 		"http://seed2.ngd.network:10332",
@@ -25,5 +26,6 @@
 		"http://seed9.ngd.network:10332",
 		"http://seed10.ngd.network:10332"
 	],
+	"websocketEventsProvider": "ws://main.neologin.io:8000/",
 	"magic":7630401
 }

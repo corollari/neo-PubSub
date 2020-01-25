@@ -56,6 +56,7 @@ type Configuration struct {
 	WebsocketPort uint     `json:"websocketPort"`
 	SeedList      []string `json:"seedList"`
 	RPCSeedList   []string `json:"rpcSeedList"`
+	websocketEventsProvider   string `json:"websocketEventsProvider"`
 	Magic         int      `json:"magic"` //network ID.
 }
 
@@ -124,6 +125,7 @@ func main() {
 	})
 
 	go startConnectToSeed(config)
+	go relayEvents(config.websocketEventsProvider)
 
 	port := fmt.Sprintf(":%d", *portInt)
 	fmt.Printf("Websocket running at port %v\n", port)
@@ -194,6 +196,41 @@ func sendMessage(channel string, message WebSocketMessage) {
 			// drop the message if nobody is ready to receive it
 		}
 	}
+}
+
+func relayEvents(websocketEventsProvider string) {
+	log.Printf("connecting to %s", websocketEventsProvider)
+
+	c, _, err := websocket.DefaultDialer.Dial(websocketEventsProvider, nil)
+	if err != nil {
+		log.Fatal("dial:", err)
+	}
+	defer c.Close()
+
+	done := make(chan struct{})
+
+	go func() {
+		defer close(done)
+		for {
+			_, message, err := c.ReadMessage()
+			if err != nil {
+				log.Println("read:", err)
+				return
+			}
+
+			var decodedMessage map[string]interface{}
+			if err := json.Unmarshal(message, &decodedMessage); err != nil {
+				panic(err)
+			}
+
+			m := WebSocketMessage{
+				Type: "events",
+				TXID: decodedMessage["txid"].(string),
+				Data: message,
+			}
+			sendMessage("events", m)
+		}
+	}()
 }
 
 func getBestNode(list []string) *neoutils.SeedNodeResponse {
