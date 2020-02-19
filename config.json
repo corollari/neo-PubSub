@@ -1,5 +1,4 @@
 {
-	"websocketPort": 8080,
 	"seedList": [
 		"main.neologin.io:10333",
 		"seed5.ngd.network:10333",

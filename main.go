@@ -53,7 +53,6 @@ type WebSocketMessage struct {
 }
 
 type Configuration struct {
-	WebsocketPort uint     `json:"websocketPort"`
 	SeedList      []string `json:"seedList"`
 	RPCSeedList   []string `json:"rpcSeedList"`
 	WebsocketEventsProvider   string `json:"websocketEventsProvider"`

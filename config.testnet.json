@@ -1,5 +1,4 @@
 {
-	"websocketPort": 8080,
 	"seedList": [
 		"seed5.ngd.network:20333",
 		"seed4.ngd.network:20333",
