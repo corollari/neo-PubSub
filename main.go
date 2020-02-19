@@ -208,28 +208,26 @@ func relayEvents(WebsocketEventsProvider string) {
 
 	done := make(chan struct{})
 
-	go func() {
-		defer close(done)
-		for {
-			_, message, err := c.ReadMessage()
-			if err != nil {
-				log.Println("read:", err)
-				return
-			}
-
-			var decodedMessage map[string]interface{}
-			if err := json.Unmarshal(message, &decodedMessage); err != nil {
-				panic(err)
-			}
-
-			m := WebSocketMessage{
-				Type: "events",
-				TXID: decodedMessage["txid"].(string),
-				Data: message,
-			}
-			sendMessage("events", m)
+	defer close(done)
+	for {
+		_, message, err := c.ReadMessage()
+		if err != nil {
+			log.Println("read:", err)
+			return
 		}
-	}()
+
+		var decodedMessage map[string]interface{}
+		if err := json.Unmarshal(message, &decodedMessage); err != nil {
+			panic(err)
+		}
+
+		m := WebSocketMessage{
+			Type: "events",
+			TXID: decodedMessage["txid"].(string),
+			Data: message,
+		}
+		sendMessage("events", m)
+	}
 }
 
 func getBestNode(list []string) *neoutils.SeedNodeResponse {
