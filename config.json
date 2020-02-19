@@ -26,6 +26,6 @@
 		"http://seed9.ngd.network:10332",
 		"http://seed10.ngd.network:10332"
 	],
-	"websocketEventsProvider": "ws://main.neologin.io:8000/",
+	"websocketEventsProvider": "wss://main.neologin.io/ws/",
 	"magic":7630401
 }

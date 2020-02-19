@@ -24,6 +24,6 @@
 		"http://seed8.ngd.network:20332",
 		"http://seed9.ngd.network:20332"
 	],
-	"websocketEventsProvider": "ws://test.neologin.io:8000/",
+	"websocketEventsProvider": "wss://test.neologin.io/ws/",
 	"magic":1953787457
 }
