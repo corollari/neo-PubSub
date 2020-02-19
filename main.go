@@ -56,7 +56,7 @@ type Configuration struct {
 	WebsocketPort uint     `json:"websocketPort"`
 	SeedList      []string `json:"seedList"`
 	RPCSeedList   []string `json:"rpcSeedList"`
-	websocketEventsProvider   string `json:"websocketEventsProvider"`
+	WebsocketEventsProvider   string `json:"websocketEventsProvider"`
 	Magic         int      `json:"magic"` //network ID.
 }
 
@@ -125,7 +125,7 @@ func main() {
 	})
 
 	go startConnectToSeed(config)
-	go relayEvents(config.websocketEventsProvider)
+	go relayEvents(config.WebsocketEventsProvider)
 
 	port := fmt.Sprintf(":%d", *portInt)
 	fmt.Printf("Websocket running at port %v\n", port)
@@ -198,10 +198,10 @@ func sendMessage(channel string, message WebSocketMessage) {
 	}
 }
 
-func relayEvents(websocketEventsProvider string) {
-	log.Printf("connecting to %s", websocketEventsProvider)
+func relayEvents(WebsocketEventsProvider string) {
+	log.Printf("connecting to %s", WebsocketEventsProvider)
 
-	c, _, err := websocket.DefaultDialer.Dial(websocketEventsProvider, nil)
+	c, _, err := websocket.DefaultDialer.Dial(WebsocketEventsProvider, nil)
 	if err != nil {
 		log.Fatal("dial:", err)
 	}
