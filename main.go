@@ -52,6 +52,11 @@ type WebSocketMessage struct {
 	Data interface{} `json:"data,omitempty"`
 }
 
+type EventData struct {
+	Contract string   `json:"contract"`
+	Call interface{}  `json:"call,omitempty"`
+}
+
 type Configuration struct {
 	SeedList      []string `json:"seedList"`
 	RPCSeedList   []string `json:"rpcSeedList"`
@@ -221,10 +226,15 @@ func relayEvents(WebsocketEventsProvider string) {
 			panic(err)
 		}
 
+		data := &EventData{
+			Contract: decodedMessage["contract"].(string),
+			Call:     decodedMessage["data"],
+		}
+
 		m := WebSocketMessage{
 			Type: "events",
 			TXID: decodedMessage["txid"].(string),
-			Data: message,
+			Data: data,
 		}
 		sendMessage("events", m)
 	}
