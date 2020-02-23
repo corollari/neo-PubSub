@@ -1,4 +1,2 @@
-github.com/corollari/neo-transaction-watcher v0.0.0-20200103135459-d336c7a67c96 h1:8Wj5H2pAFlO1MfZ9ofyyeH90Yb3mzVF81OVkkGrbRXI=
-github.com/corollari/neo-transaction-watcher v0.0.0-20200103135459-d336c7a67c96/go.mod h1:lmBKGrRET6p35K/vSU7OSOu9vquWVnD+2Ee3Sq96Ziw=
 github.com/gorilla/websocket v1.4.1 h1:q7AeDBpnBk8AogcD4DSag/Ukw/KV+YhzLj2bP5HvKCM=
 github.com/gorilla/websocket v1.4.1/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=

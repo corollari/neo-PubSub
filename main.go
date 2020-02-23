@@ -16,8 +16,8 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/corollari/neo-transaction-watcher/neotx"
-	"github.com/corollari/neo-transaction-watcher/neotx/network"
+	"github.com/corollari/neo-ws-pub-sub/neo-transaction-watcher/neotx"
+	"github.com/corollari/neo-ws-pub-sub/neo-transaction-watcher/neotx/network"
 
 	"github.com/corollari/neo-ws-pub-sub/neoutils"
 	"github.com/corollari/neo-ws-pub-sub/neorpc"
@@ -80,17 +80,16 @@ var currentConfig Configuration
 
 //Base on the article 10M Concurrent websocket on https://goroutines.com/10m
 func main() {
-	mode := flag.String("network", "", "Network to connect to. main | test | private")
+	mode := flag.String("network", "", "Network to connect to. main | test")
 	portInt := flag.Int("port", 8080, "Port to bind to")
 	flag.Parse()
 
 	if *mode == "" {
-		//default mode is private
 		defaultEnv := "main"
 		mode = &defaultEnv
 	}
 
-	file := "config.privatenet.json"
+	var file string
 	if *mode == "main" {
 		file = "config.json"
 	} else if *mode == "test" {

@@ -3,18 +3,16 @@
 [![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
 
 #### Under the hood
-It spins up a websocket server and uses [neo-transaction-watcher](https://github.com/O3Labs/neo-transaction-watcher) to connect to a NEO node that is connected to the NEO Network. whenever the NEO node broadcasts data to its connected clients. This client publishes the data to its subscribed clients by channel. 
+It spins up a websocket server that connects to a NEO node that is connected to the NEO Network. Whenever the NEO node broadcasts data to its connected clients, this client publishes the data to its subscribed clients by channel. 
 
 #### Dependencies
 ```
 go get github.com/gorilla/websocket
-go get github.com/corollari/neo-transaction-watcher
-go get github.com/corollari/neo-utils/neoutils
 ```
 
 #### Run
 ```bash
-go run main.go -network=[main|test|private]
+go run main.go -network=[main|test]
 ```
 
 ##### Available network
@@ -22,7 +20,6 @@ go run main.go -network=[main|test|private]
 | ------------- |-------------|-------------|
 | main      | NEO Main network | config.json |
 | test      | NEO Test network | config.testnet.json |
-| private      | NEO private network running locally | config.privatenet.json |
 
 
 #### Websocket URL
@@ -36,6 +33,9 @@ ws://localhost:8080/?channel=tx
 | consensus      | Consensus data |
 | block      | Block |
 | tx      | Transaction |
+| events      | Smart contract events |
+
+**Note**: The node listed on websocketEventsProvider needs to have the NeoPubSub plugin installed along with several other requirements described in [this guide](https://github.com/corollari/neo-node-setupGuide/blob/master/extension-NeoPubSub.md).
 
 ### Heroku deployment
 ```bash
@@ -60,10 +60,6 @@ Afterwards the following changes can be made manually from heroku's dashboard:
 
 #### Example
 See `example/client.html`
-
-#### TODO
-- [ ] subscribe to particular smart contract.  
-- [ ] subscribe to particular function in a smart contract.  
 
 ---
 
