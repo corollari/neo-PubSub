@@ -7,7 +7,7 @@ It spins up a websocket server that connects to a NEO node that is connected to 
 
 #### Dependencies
 ```
-go get github.com/gorilla/websocket
+go get
 ```
 
 #### Run
