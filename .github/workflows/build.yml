@@ -1,0 +1,26 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/setup-go@v1
+      with:
+        go-version: '1.9.3' # The Go version to download (if necessary) and use.
+    - name: Install dependencies
+      run: go get
+    - name: Build go package
+      run: go build
+    - name: Deploy website to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v2.5.0
+      if: success() && github.event_name == 'push' && github.ref == 'refs/heads/master'
+      env: 
+        PUBLISH_DIR: ./website
+        PUBLISH_BRANCH: gh-pages
+        ACTIONS_DEPLOY_KEY: ${{ secrets.ACTIONS_DEPLOY_KEY }}
