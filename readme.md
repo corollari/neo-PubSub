@@ -1,4 +1,4 @@
-![banner](https://raw.githubusercontent.com/corollari/neo-PubSub/master/banner.png)
+![banner](https://raw.githubusercontent.com/corollari/neo-PubSub/master/website/banner.png)
 
 <h4 align="center">A simple WebSocket Pub/Sub server for the NEO blockchain</h4>
 
