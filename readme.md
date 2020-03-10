@@ -18,6 +18,9 @@ wss://pubsub.main.neologin.io?channel=tx # A transaction has entered in the memp
 wss://pubsub.main.neologin.io?channel=block # A block is propagated (not finalized tho)
 wss://pubsub.main.neologin.io?channel=consensus # Consensus messages
 ```
+
+You can test these websocket endpoints directly [here](https://corollari.github.io/neo-PubSub/) or check [some response examples](#example-events).
+
 **Note**: If you wish to get events from testnet instead of mainnet just replace the `main` prefix with `test`, eg: `pubsub.test.neologin.io`.
 
 Using javascript, you can connect to these endpoints with the following code:
