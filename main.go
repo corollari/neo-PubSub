@@ -133,7 +133,7 @@ func main() {
 }
 
 //Handle websocket connection
-//Available channels are consensus,block and tx.
+//Available channels are block, events and tx.
 func handleConnection(ws *websocket.Conn, channel string) {
 	sub := subscribe(channel)
 	atomic.AddInt64(&connected, 1)
@@ -313,14 +313,16 @@ func (h *NEOConnectionHandler) OnReceive(tx neotx.TX) {
 		// }
 		sendMessage(tx.Type.String(), m)
 		return
+	} else if tx.Type == network.InventotyTypeBlock {
+		// new block
+		m := WebSocketMessage{
+			Type: tx.Type.String(),
+			TXID: tx.ID,
+		}
+		fmt.Printf("%+v", m)
+		sendMessage(tx.Type.String(), m)
 	}
-	//another type of INV. consensus and block
-	m := WebSocketMessage{
-		Type: tx.Type.String(),
-		TXID: tx.ID,
-	}
-	fmt.Printf("%+v", m)
-	sendMessage(tx.Type.String(), m)
+	// The remaining type of inv message is consensus, we ignore them
 }
 
 func (h *NEOConnectionHandler) OnConnected(c network.Version) {

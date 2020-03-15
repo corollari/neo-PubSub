@@ -16,7 +16,6 @@ We built a publish-subscribe service for NEO that allows anyone to listen for ev
 wss://pubsub.main.neologin.io?channel=events # Events triggered in smart contract executions (final)
 wss://pubsub.main.neologin.io?channel=tx # A transaction has entered in the mempool (but may not be inside a block yet)
 wss://pubsub.main.neologin.io?channel=block # A block is propagated (not finalized tho)
-wss://pubsub.main.neologin.io?channel=consensus # Consensus messages
 ```
 
 You can test these websocket endpoints directly [here](https://corollari.github.io/neo-PubSub/) or check [some response examples](#example-events).
@@ -55,7 +54,6 @@ ws://localhost:8080/?channel=tx
 ##### Available channels
 | Channel        | Description |
 | ------------- |-------------|
-| consensus      | Consensus data |
 | block      | Block |
 | tx      | Transaction |
 | events      | Smart contract events |
@@ -141,14 +139,6 @@ Afterwards, the following changes can be made manually from heroku's dashboard:
          "blocktime":0
       }
    }
-}
-```
-
-### consensus
-```json
-{
-   "type":"consensus",
-   "txID":"95d5855180e77540412f3fb707ed50fed848f9ec7887073513625e1b9ec9fbbb"
 }
 ```
 
