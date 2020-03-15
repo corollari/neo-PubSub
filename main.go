@@ -321,17 +321,6 @@ func (h *NEOConnectionHandler) OnReceive(tx neotx.TX) {
 			Data: raw,
 		}
 		fmt.Printf(" %v: %+v", tx.ID, raw.Result.Type)
-		// if raw.Result.Type == "InvocationTransaction" {
-		// 	parser := smartcontract.NewParserWithScript(raw.Result.Script)
-		// 	result, err := parser.GetListOfScriptHashes()
-		// 	if err != nil {
-		// 		return
-		// 	}
-		// 	for _, v := range result {
-
-		// 		fmt.Printf("result = %v\n", v)
-		// 	}
-		// }
 		sendMessage(tx.Type.String(), m)
 		return
 	} else if tx.Type == network.InventotyTypeBlock {
