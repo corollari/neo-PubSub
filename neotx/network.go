@@ -9,7 +9,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/corollari/neo-ws-pub-sub/neo-transaction-watcher/neotx/network"
+	"github.com/corollari/neo-ws-pub-sub/neotx/network"
 )
 
 //Network
