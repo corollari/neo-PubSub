@@ -111,15 +111,28 @@ func main() {
 	}()
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		channel := r.URL.Path[1:]
+		contract := r.URL.Query().Get("contract")
+
+		// Close connection if endpoint is not one of the accepted ones
+		if channel != "events" && channel != "ping" && channel != "tx" && channel != "block" {
+			http.Error(w, "This endpoint is not available", 404)
+			return
+		}
+
+		// Upgrade connection to websockets protocol
 		ws, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
 			return
 		}
 
-		channel := r.URL.Query().Get("channel")
 		// launch a new goroutine so that this function can return and the http server can free up
 		// buffers associated with this connection
-		go handleConnection(ws, channel)
+		if contract != "" && channel == "events" {
+			go handleConnection(ws, contract)
+		} else {
+			go handleConnection(ws, channel)
+		}
 	})
 
 	go startConnectToSeed(config)
@@ -215,23 +228,31 @@ func relayEvents(WebsocketEventsProvider string) {
 			return
 		}
 
-		var decodedMessage map[string]interface{}
-		if err := json.Unmarshal(message, &decodedMessage); err != nil {
-			panic(err)
-		}
-
-		data := &EventData{
-			Contract: decodedMessage["contract"].(string),
-			Call:     decodedMessage["data"],
-		}
-
-		m := WebSocketMessage{
-			Type: "events",
-			TXID: decodedMessage["txid"].(string),
-			Data: data,
-		}
-		sendMessage("events", m)
+		go broadcastMessage(message)
 	}
+}
+
+func broadcastMessage(message []byte) {
+	var decodedMessage map[string]interface{}
+	if err := json.Unmarshal(message, &decodedMessage); err != nil {
+		panic(err)
+	}
+
+	contract := decodedMessage["contract"].(string)
+	log.Printf("received event on %s", contract)
+
+	data := &EventData{
+		Contract: contract,
+		Call:     decodedMessage["data"],
+	}
+
+	m := WebSocketMessage{
+		Type: "events",
+		TXID: decodedMessage["txid"].(string),
+		Data: data,
+	}
+	sendMessage("events", m)
+	sendMessage(contract, m)
 }
 
 func getBestNode(list []string) *neoutils.SeedNodeResponse {
