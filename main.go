@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	maxMessageSize = 256
+	maxMessageSize = 4096
 	pingPeriod     = 5 * time.Minute
 )
 
