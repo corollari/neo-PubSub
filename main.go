@@ -80,14 +80,9 @@ var currentConfig Configuration
 
 //Base on the article 10M Concurrent websocket on https://goroutines.com/10m
 func main() {
-	mode := flag.String("network", "", "Network to connect to. main | test")
+	mode := flag.String("network", "main", "Network to connect to. main | test")
 	portInt := flag.Int("port", 8080, "Port to bind to")
 	flag.Parse()
-
-	if *mode == "" {
-		defaultEnv := "main"
-		mode = &defaultEnv
-	}
 
 	var file string
 	if *mode == "main" {
