@@ -24,13 +24,22 @@ import (
 )
 
 const (
-	maxMessageSize = 4096
-	pingPeriod     = 5 * time.Minute
+	bufferSize        = 4096
+	clientPingPeriod  = 5 * time.Minute
+
+	// Time allowed to write a message to the peer.
+	writeWait = 1 * time.Second
+
+	// Time allowed to read the next pong message from the peer.
+	pongWait = 6 * time.Second
+
+	// Send pings to peer with this period. Must be less than pongWait.
+	serverPingPeriod = (pongWait * 9) / 10
 )
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  16,
-	WriteBufferSize: maxMessageSize,
+	WriteBufferSize: bufferSize,
 	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},
@@ -150,7 +159,7 @@ func main() {
 func handleConnection(ws *websocket.Conn, channel string) {
 	sub := subscribe(channel)
 	atomic.AddInt64(&connected, 1)
-	t := time.NewTicker(pingPeriod)
+	t := time.NewTicker(clientPingPeriod)
 
 	var message WebSocketMessage
 
@@ -209,6 +218,8 @@ func sendMessage(channel string, message WebSocketMessage) {
 	}
 }
 
+// Adapted from https://github.com/gorilla/websocket/blob/master/examples/echo/client.go
+// Ping/pong system based on https://github.com/gorilla/websocket/blob/master/examples/chat/client.go
 func relayEvents(WebsocketEventsProvider string) {
 	log.Printf("connecting to %s", WebsocketEventsProvider)
 
@@ -218,17 +229,48 @@ func relayEvents(WebsocketEventsProvider string) {
 	}
 	defer c.Close()
 
+	// Restart connection when lost
+	defer func() {
+		log.Printf("connection to %s lost, reconnecting...", WebsocketEventsProvider)
+		// TODO: Set up exponential back-off system
+		time.Sleep(10 * time.Second)
+		go relayEvents(WebsocketEventsProvider)
+	}()
+
 	done := make(chan struct{})
 
-	defer close(done)
-	for {
-		_, message, err := c.ReadMessage()
-		if err != nil {
-			log.Println("read:", err)
-			return
-		}
+	go func() {
+		defer close(done)
 
-		go broadcastMessage(message)
+		for {
+			_, message, err := c.ReadMessage()
+			if err != nil {
+				log.Println("read:", err)
+				return
+			}
+
+			go broadcastMessage(message)
+		}
+	}()
+
+	// Set up ping system
+	c.SetReadDeadline(time.Now().Add(pongWait))
+	c.SetPongHandler(func(string) error { c.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+	ticker := time.NewTicker(serverPingPeriod) // Ping timer
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-done:
+			return
+		case <-ticker.C:
+			c.SetWriteDeadline(time.Now().Add(writeWait))
+			err := c.WriteMessage(websocket.PingMessage, nil)
+			if err != nil {
+				log.Println("Error on ping write:", err)
+				return
+			}
+		}
 	}
 }
 
