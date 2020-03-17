@@ -13,9 +13,10 @@
 ## Use
 We built a publish-subscribe service for NEO that allows anyone to listen for events happening on the blockchain and act on them. The service is based in websockets and can be used by just connecting to the following endpoints:
 ```
-wss://pubsub.main.neologin.io?channel=events # Events triggered in smart contract executions (final)
-wss://pubsub.main.neologin.io?channel=tx # A transaction has entered in the mempool (but may not be inside a block yet)
-wss://pubsub.main.neologin.io?channel=block # A block is propagated (not finalized tho)
+wss://pubsub.main.neologin.io/events # Events triggered in smart contract executions (final)
+wss://pubsub.main.neologin.io/events?contract=0xfb84b0950e8fd366af566b2911d6183e4b0367f7 # Events from a specific contract
+wss://pubsub.main.neologin.io/tx # A transaction has entered in the mempool (but may not be inside a block yet)
+wss://pubsub.main.neologin.io/block # A block is propagated (not finalized tho)
 ```
 
 You can test these websocket endpoints directly [here](https://corollari.github.io/neo-PubSub/) or check [some response examples](#example-events).
@@ -24,7 +25,7 @@ You can test these websocket endpoints directly [here](https://corollari.github.
 
 Using javascript, you can connect to these endpoints with the following code:
 ```js
-const ws = new WebSocket('wss://pubsub.main.neologin.io/?channel=events')
+const ws = new WebSocket('wss://pubsub.main.neologin.io/events')
 ws.onmessage = (event) => {
   console.log(event.data);
 }
@@ -48,7 +49,7 @@ go run main.go -network=[main|test] # Run server
 
 When it's running, you can use it by connecting to the following endpoint:
 ```
-ws://localhost:8080/?channel=tx
+ws://localhost:8080/events
 ```
 
 ##### Available channels
@@ -57,6 +58,8 @@ ws://localhost:8080/?channel=tx
 | block      | Block |
 | tx      | Transaction |
 | events      | Smart contract events |
+
+The `events` channel can be filtered by contract with the query parameter `contract`. For example, `wss://pubsub.main.neologin.io/events?contract=0xfb84b0950e8fd366af566b2911d6183e4b0367f7` will only receive events triggered inside the `0xfb84b0950e8fd366af566b2911d6183e4b0367f7` contract.
 
 ### Available networks
 | Network        | Description | Config file
