@@ -2,6 +2,7 @@ using System;
 using StackExchange.Redis;
 using Neo.Ledger;
 using Neo.VM;
+using Neo.IO.Json;
 using Neo.SmartContract;
 using System.Collections.Generic;
 
@@ -31,6 +32,9 @@ namespace Neo.Plugins
 
         public void OnPersist(Snapshot snapshot, IReadOnlyList<Blockchain.ApplicationExecuted> applicationExecutedList)
         {
+			JObject blockJson = snapshot.PersistingBlock.ToJson();
+			blockJson["confirmations"] = 1;
+            connection.GetSubscriber().Publish("blocks", blockJson.ToString());
             foreach (var appExec in applicationExecutedList)
             {
                 var txid = appExec.Transaction.Hash.ToString();
@@ -42,7 +46,7 @@ namespace Neo.Plugins
                         {
                             string contract = q.ScriptHash.ToString();
                             string r = q.State.ToParameter().ToJson().ToString();
-                            connection.GetSubscriber().Publish("events", $"{{\"contract\":\"{contract}\", \"txid\":\"{txid}\", \"data\":{r}}}");
+                            connection.GetSubscriber().Publish("events", $"{{\"contract\":\"{contract}\", \"txid\":\"{txid}\", \"call\":{r}}}");
                         }
                     }
                 }
