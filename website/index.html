@@ -42,16 +42,18 @@ img{
 	<body>
 		<img src="banner.png">
 		<pre>It might take some time (~10 seconds) for events to start appearing due to the delay between blocks</pre>
-		<h2><pre>wss://pubsub.main.neologin.io/events</pre></h2>
+		<h2><pre>wss://pubsub.main.neologin.io/event</pre></h2>
 		<textarea id="events" class="outbox"></textarea>
-		<h2><pre>wss://pubsub.main.neologin.io/tx</pre></h2>
+		<h2><pre>wss://pubsub.main.neologin.io/mempool/tx</pre></h2>
 		<textarea id="tx" class="outbox"></textarea>
 		<h2><pre>wss://pubsub.main.neologin.io/block</pre></h2>
 		<textarea id="block" class="outbox"></textarea>
+		<h2><pre>wss://pubsub.main.neologin.io/mempool/block</pre></h2>
+		<textarea id="mempool/block" class="outbox"></textarea>
 		<hr />
 		<pre>Built with ♥️ by the <a href="https://neologin.io">NeoLogin</a> team and <a href="https://github.com/corollari/neo-PubSub">open-sourced on Github</a></pre>
 		<script>
-			for(const channel of ["events", "tx", "block"]){
+			for(const channel of ["event", "mempool/tx", "block", "mempool/block"]){
 				const ws = new WebSocket('wss://pubsub.main.neologin.io/'+channel)
 				const el = document.getElementById(channel)
 				ws.onmessage = (event) => {
