@@ -61,11 +61,6 @@ type WebSocketMessage struct {
 	Data interface{} `json:"data,omitempty"`
 }
 
-type EventData struct {
-	Contract string   `json:"contract"`
-	Call interface{}  `json:"call,omitempty"`
-}
-
 type Configuration struct {
 	SeedList      []string `json:"seedList"`
 	RPCSeedList   []string `json:"rpcSeedList"`
@@ -121,10 +116,13 @@ func main() {
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		channel := r.URL.Path[1:]
+        if channel[len(channel)-1] == '/' {
+            channel = channel[:len(channel)-1] // Remove trailing slash
+        }
 		contract := r.URL.Query().Get("contract")
 
 		// Close connection if endpoint is not one of the accepted ones
-		if channel != "events" && channel != "ping" && channel != "tx" && channel != "block" {
+		if channel != "event" && channel != "ping" && channel != "mempool/tx" && channel != "mempool/block" && channel != "block" {
 			http.Error(w, "This endpoint is not available", 404)
 			return
 		}
@@ -137,7 +135,7 @@ func main() {
 
 		// launch a new goroutine so that this function can return and the http server can free up
 		// buffers associated with this connection
-		if contract != "" && channel == "events" {
+		if contract != "" && channel == "event" {
 			go handleConnection(ws, contract)
 		} else {
 			go handleConnection(ws, channel)
@@ -155,7 +153,7 @@ func main() {
 }
 
 //Handle websocket connection
-//Available channels are block, events and tx.
+//Available channels are block, event, mempool/block and mempool/tx.
 func handleConnection(ws *websocket.Conn, channel string) {
 	sub := subscribe(channel)
 	atomic.AddInt64(&connected, 1)
@@ -277,24 +275,30 @@ func relayEvents(WebsocketEventsProvider string) {
 func broadcastMessage(message []byte) {
 	var decodedMessage map[string]interface{}
 	if err := json.Unmarshal(message, &decodedMessage); err != nil {
-		panic(err)
-	}
+        panic(err)
+    }
 
-	contract := decodedMessage["contract"].(string)
-	log.Printf("received event on %s", contract)
+    msgType := decodedMessage["type"].(string)
 
-	data := &EventData{
-		Contract: contract,
-		Call:     decodedMessage["data"],
-	}
+    if msgType == "events" {
+        contract := decodedMessage["data"].(map[string]interface{})["contract"].(string)
+        log.Printf("received event on %s", contract)
 
-	m := WebSocketMessage{
-		Type: "events",
-		TXID: decodedMessage["txid"].(string),
-		Data: data,
-	}
-	sendMessage("events", m)
-	sendMessage(contract, m)
+        m := WebSocketMessage{
+            Type: "event",
+            TXID: "1",
+            Data: decodedMessage["data"],
+        }
+        sendMessage("event", m)
+        sendMessage(contract, m)
+    } else if msgType == "blocks" {
+        m := WebSocketMessage{
+            Type: "block",
+            TXID: "1",
+            Data: decodedMessage["data"],
+        }
+        sendMessage("block", m)
+    }
 }
 
 func getBestNode(list []string) *neoutils.SeedNodeResponse {
@@ -363,7 +367,7 @@ func (h *NEOConnectionHandler) OnReceive(tx neotx.TX) {
 			Data: raw,
 		}
 		fmt.Printf(" %v: %+v", tx.ID, raw.Result.Type)
-		sendMessage(tx.Type.String(), m)
+		sendMessage("mempool/tx", m)
 		return
 	} else if tx.Type == network.InventotyTypeBlock {
 		// new block
@@ -372,7 +376,7 @@ func (h *NEOConnectionHandler) OnReceive(tx neotx.TX) {
 			TXID: tx.ID,
 		}
 		fmt.Printf("%+v", m)
-		sendMessage(tx.Type.String(), m)
+		sendMessage("mempool/block", m)
 	}
 	// The remaining type of inv message is consensus, we ignore them
 }
