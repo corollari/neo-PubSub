@@ -4,8 +4,8 @@
 
 A plugin for neo-cli to publish smart contract events to a Redis PubSub queue
 
-### Author
-hal0x2328
+### Authors
+Created by hal0x2328, modified by corollari
 
 ### Installation
 ```bash
@@ -19,6 +19,8 @@ cp ./bin/Release/netstandard2.0/publish/System.Diagnostics.PerformanceCounter.dl
 cp ./bin/Release/netstandard2.0/publish/Pipelines.Sockets.Unofficial.dll {neo-cli folder}/Plugins
 # cp ./bin/Release/netstandard2.0/publish/System.IO.Pipelines {neo-cli folder}/Plugins # Already a dependency of neo-cli
 ```
+
+See also [this installation guide for ubuntu](https://github.com/corollari/neo-node-setupGuide/blob/master/extension-NeoPubSub.md).
 
 ### Usage with websockets
 ```bash
