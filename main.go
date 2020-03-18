@@ -55,11 +55,7 @@ var (
 	failed    int64
 )
 
-type WebSocketMessage struct {
-	Type string      `json:"type"`
-	TXID string      `json:"txID"`
-	Data interface{} `json:"data,omitempty"`
-}
+type WebSocketMessage interface{}
 
 type Configuration struct {
 	SeedList      []string `json:"seedList"`
@@ -160,16 +156,23 @@ func handleConnection(ws *websocket.Conn, channel string) {
 	t := time.NewTicker(clientPingPeriod)
 
 	var message WebSocketMessage
+	var ping bool
 
 	for {
 		select {
 		case <-t.C:
-			message = WebSocketMessage{}
+			ping = true
 		case message = <-sub:
+			ping = false
 		}
 
 		ws.SetWriteDeadline(time.Now().Add(30 * time.Second))
-		err := ws.WriteJSON(message)
+		var err error
+		if ping == true {
+			err = ws.WriteMessage(websocket.PingMessage, nil)
+		} else {
+			err = ws.WriteJSON(message)
+		}
 		if err != nil {
 			break
 		}
@@ -284,19 +287,13 @@ func broadcastMessage(message []byte) {
         contract := decodedMessage["data"].(map[string]interface{})["contract"].(string)
         log.Printf("received event on %s", contract)
 
-        m := WebSocketMessage{
-            Type: "event",
-            TXID: "1",
-            Data: decodedMessage["data"],
-        }
+        m := decodedMessage["data"]
+
         sendMessage("event", m)
         sendMessage(contract, m)
     } else if msgType == "blocks" {
-        m := WebSocketMessage{
-            Type: "block",
-            TXID: "1",
-            Data: decodedMessage["data"],
-        }
+        m := decodedMessage["data"]
+
         sendMessage("block", m)
     }
 }
@@ -350,30 +347,26 @@ func (h *NEOConnectionHandler) OnReceive(tx neotx.TX) {
 	if tx.Type == network.InventotyTypeTX {
 		//Call getrawtransaction to get the transaction detail by txid
 
-		best := getBestNode(h.config.RPCSeedList)
-		if best == nil {
-			return
-		}
+		rpcNode := h.config.RPCSeedList[0] //Has to communicate with the same node that it got the transaction from, otherwise another node might not know about the tx
 
-		client := neorpc.NewClient(best.URL)
+		client := neorpc.NewClient(rpcNode)
 		raw := client.GetRawTransaction(tx.ID)
 
 		if raw.ErrorResponse != nil {
 			return
 		}
-		m := WebSocketMessage{
-			Type: tx.Type.String(),
-			TXID: tx.ID,
-			Data: raw,
-		}
+
+		m := raw.Result
+
 		fmt.Printf(" %v: %+v", tx.ID, raw.Result.Type)
 		sendMessage("mempool/tx", m)
 		return
 	} else if tx.Type == network.InventotyTypeBlock {
 		// new block
-		m := WebSocketMessage{
-			Type: tx.Type.String(),
-			TXID: tx.ID,
+		m := struct{
+			Hash string `json:"hash"`
+		}{
+			"0x" + tx.ID,
 		}
 		fmt.Printf("%+v", m)
 		sendMessage("mempool/block", m)
