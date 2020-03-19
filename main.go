@@ -57,6 +57,12 @@ var (
 
 type WebSocketMessage interface{}
 
+type EventMessage struct {
+	TxId      string `json:"txid"`
+	Contract  string `json:"contract"`
+	Event     interface{} `json:"event"`
+}
+
 type Configuration struct {
 	SeedList      []string `json:"seedList"`
 	RPCSeedList   []string `json:"rpcSeedList"`
@@ -302,19 +308,22 @@ func broadcastMessage(message []byte) {
     }
 
     msgType := decodedMessage["type"].(string)
+    msgPayload := decodedMessage["data"].(map[string]interface{})
 
     if msgType == "events" {
-        contract := decodedMessage["data"].(map[string]interface{})["contract"].(string)
+        contract := msgPayload["contract"].(string)
         log.Printf("received event on %s", contract)
 
-        m := decodedMessage["data"]
+        m := EventMessage {
+            msgPayload["txid"].(string),
+            contract,
+            msgPayload["call"].(map[string]interface{})["value"],
+        }
 
         sendMessage("event", m)
         sendMessage(contract, m)
     } else if msgType == "blocks" {
-        m := decodedMessage["data"]
-
-        sendMessage("block", m)
+        sendMessage("block", msgPayload)
     }
 }
 
