@@ -133,6 +133,8 @@ func main() {
 		// buffers associated with this connection
 		if contract != "" && channel == "event" {
 			go handleConnection(ws, contract)
+		} else if channel == "ping" {
+			go handlePingConnection(ws)
 		} else {
 			go handleConnection(ws, channel)
 		}
@@ -145,6 +147,24 @@ func main() {
 	fmt.Printf("Websocket running at port %v\n", port)
 	if err := http.ListenAndServe(port, nil); err != nil {
 		log.Fatal(err)
+	}
+}
+
+// This endpoint is purposefully undocumented because it was only created for compatibility with neo-mon's latency checks
+// TODO: Add deadlines for pings in order to prevent connections being left open?
+func handlePingConnection(ws *websocket.Conn) {
+	defer ws.Close()
+	for {
+		_, message, err := ws.ReadMessage()
+		if err != nil {
+			break
+		}
+		if string(message) == "ping" {
+			err = ws.WriteMessage(websocket.TextMessage, []byte("pong"))
+			if err != nil {
+				break
+			}
+		}
 	}
 }
 
