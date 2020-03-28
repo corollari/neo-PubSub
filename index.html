@@ -48,12 +48,10 @@ img{
 		<textarea id="mempool/tx" class="outbox"></textarea>
 		<h2><pre>wss://pubsub.main.neologin.io/block</pre></h2>
 		<textarea id="block" class="outbox"></textarea>
-		<h2><pre>wss://pubsub.main.neologin.io/mempool/block</pre></h2>
-		<textarea id="mempool/block" class="outbox"></textarea>
 		<hr />
 		<pre>Built with ♥️ by the <a href="https://neologin.io">NeoLogin</a> team and <a href="https://github.com/corollari/neo-PubSub">open-sourced on Github</a></pre>
 		<script>
-			for(const channel of ["event", "mempool/tx", "block", "mempool/block"]){
+			for(const channel of ["event", "mempool/tx", "block"]){
 				const ws = new WebSocket('wss://pubsub.main.neologin.io/'+channel)
 				const el = document.getElementById(channel)
 				ws.onmessage = (event) => {
