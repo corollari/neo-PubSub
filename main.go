@@ -124,7 +124,7 @@ func main() {
 		contract := r.URL.Query().Get("contract")
 
 		// Close connection if endpoint is not one of the accepted ones
-		if channel != "event" && channel != "ping" && channel != "mempool/tx" && channel != "mempool/block" && channel != "block" {
+		if channel != "event" && channel != "ping" && channel != "mempool/tx" && channel != "block" {
 			http.Error(w, "This endpoint is not available", 404)
 			return
 		}
@@ -175,7 +175,7 @@ func handlePingConnection(ws *websocket.Conn) {
 }
 
 //Handle websocket connection
-//Available channels are block, event, mempool/block and mempool/tx.
+//Available channels are block, event and mempool/tx.
 func handleConnection(ws *websocket.Conn, channel string) {
 	sub := subscribe(channel)
 	atomic.AddInt64(&connected, 1)
@@ -390,17 +390,8 @@ func (h *NEOConnectionHandler) OnReceive(tx neotx.TX) {
 		fmt.Printf(" %v: %+v", tx.ID, raw.Result.Type)
 		sendMessage("mempool/tx", m)
 		return
-	} else if tx.Type == network.InventotyTypeBlock {
-		// new block
-		m := struct{
-			Hash string `json:"hash"`
-		}{
-			"0x" + tx.ID,
-		}
-		fmt.Printf("%+v", m)
-		sendMessage("mempool/block", m)
 	}
-	// The remaining type of inv message is consensus, we ignore them
+	// The remaining type of inv message are consensus and block, we ignore them
 }
 
 func (h *NEOConnectionHandler) OnConnected(c network.Version) {

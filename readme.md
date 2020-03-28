@@ -17,7 +17,6 @@ wss://pubsub.main.neologin.io/event # Events triggered in smart contract executi
 wss://pubsub.main.neologin.io/event?contract=0xfb84b0950e8fd366af566b2911d6183e4b0367f7 # Events from a specific contract
 wss://pubsub.main.neologin.io/mempool/tx # A transaction has entered in the mempool (but may not be inside a block yet)
 wss://pubsub.main.neologin.io/block # A block is finalized
-wss://pubsub.main.neologin.io/mempool/block # A block is propagated (still not finalized)
 ```
 
 You can test these websocket endpoints directly [here](https://corollari.github.io/neo-PubSub/) or check [some response examples](#example-events).
@@ -58,7 +57,6 @@ ws://localhost:8080/event
 | ------------- |-------------|
 | event      | Smart contract event |
 | block      | Block |
-| mempool/block      | Mempool Block |
 | mempool/tx      | Mempool Transaction |
 
 The `event` channel can be filtered by contract with the query parameter `contract`. For example, `wss://pubsub.main.neologin.io/event?contract=0xfb84b0950e8fd366af566b2911d6183e4b0367f7` will only receive events triggered inside the `0xfb84b0950e8fd366af566b2911d6183e4b0367f7` contract.
@@ -154,13 +152,6 @@ Afterwards, the following changes can be made manually from heroku's dashboard:
    "blockhash":"",
    "confirmations":0,
    "blocktime":0
-}
-```
-
-### mempool/block
-```json
-{
-   "hash":"0x715c921fa65352b657afd8db82a1e65d7ea0cf6686fc30f3bf80a607cc6fff4d"
 }
 ```
 
