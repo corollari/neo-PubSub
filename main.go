@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io"
 	"log"
 	"net"
 	"net/http"
@@ -63,9 +62,13 @@ type EventMessage struct {
 	Event     interface{} `json:"event"`
 }
 
+type NodeAddresses struct {
+	P2P      string `json:"p2p"`
+	RPC      string `json:"rpc"`
+}
+
 type Configuration struct {
-	SeedList      []string `json:"seedList"`
-	RPCSeedList   []string `json:"rpcSeedList"`
+	Nodes      []NodeAddresses `json:"nodes"`
 	WebsocketEventsProvider   string `json:"websocketEventsProvider"`
 	Magic         int      `json:"magic"` //network ID.
 }
@@ -146,7 +149,7 @@ func main() {
 		}
 	})
 
-	go startConnectToSeed(config)
+	go startConnectToSeed(config, 0)
 	go relayEvents(config.WebsocketEventsProvider)
 
 	port := fmt.Sprintf(":%d", *portInt)
@@ -335,9 +338,9 @@ func getBestNode(list []string) *neoutils.SeedNodeResponse {
 var connectedToNEONode = false
 
 //this is NEO part
-func startConnectToSeed(config Configuration) {
-	first := config.SeedList[0]
-	host, port, err := net.SplitHostPort(first)
+func startConnectToSeed(config Configuration, iteration int) {
+	node := config.Nodes[iteration]
+	host, port, err := net.SplitHostPort(node.P2P)
 	if err != nil {
 		fmt.Printf("%v", err)
 		os.Exit(-1)
@@ -355,19 +358,25 @@ func startConnectToSeed(config Configuration) {
 	client := neotx.NewClient(neoNodeConfig)
 	handler := &NEOConnectionHandler{}
 	handler.config = config
+	handler.nodeNumber = iteration
 
 	client.SetDelegate(handler)
 
 	fmt.Printf("connecting to %v:%v...\n", neoNodeConfig.IPAddress, neoNodeConfig.Port)
 	err = client.Start()
 	if err != nil {
-		fmt.Printf("%v", err)
-		os.Exit(-1)
+		if iteration < len(config.Nodes){
+			go startConnectToSeed(config, iteration + 1)
+		} else {
+			fmt.Printf("%v", err)
+			os.Exit(-1)
+		}
 	}
 }
 
 type NEOConnectionHandler struct {
 	config Configuration
+	nodeNumber int
 }
 
 //implement the message protocol
@@ -376,7 +385,7 @@ func (h *NEOConnectionHandler) OnReceive(tx neotx.TX) {
 	if tx.Type == network.InventotyTypeTX {
 		//Call getrawtransaction to get the transaction detail by txid
 
-		rpcNode := h.config.RPCSeedList[0] //Has to communicate with the same node that it got the transaction from, otherwise another node might not know about the tx
+		rpcNode := h.config.Nodes[h.nodeNumber].RPC //Has to communicate with the same node that it got the transaction from, otherwise another node might not know about the tx
 
 		client := neorpc.NewClient(rpcNode)
 		raw := client.GetRawTransaction(tx.ID)
@@ -400,16 +409,6 @@ func (h *NEOConnectionHandler) OnConnected(c network.Version) {
 }
 
 func (h *NEOConnectionHandler) OnError(e error) {
-	if e == io.EOF && connectedToNEONode == true {
-		connectedToNEONode = false
-		fmt.Printf("Disconnected from host. will try to connect in 15 seconds...")
-		for {
-			time.Sleep(2 * time.Second)
-			//we need to implement backoff and retry to reconnect here
-			//if the error is EOF then we try to reconnect
-			go startConnectToSeed(currentConfig)
-		}
-	} else {
-		os.Exit(1);
-	}
+	fmt.Printf("Disconnected from host. Trying to connect to a different host...")
+	go startConnectToSeed(currentConfig, (h.nodeNumber + 1) % len(h.config.Nodes))
 }

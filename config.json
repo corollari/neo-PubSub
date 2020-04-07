@@ -1,29 +1,49 @@
 {
-	"seedList": [
-		"main.neologin.io:10333",
-		"seed5.ngd.network:10333",
-		"seed4.ngd.network:10333",
-		"seed3.ngd.network:10333",
-		"seed2.ngd.network:10333",
-		"seed1.ngd.network:10333"
-	],
-	"rpcSeedList":[
-		"https://main.neologin.io:443",
-		"http://seed1.ngd.network:10332",
-		"https://seed1.cityofzion.io:443",
-		"http://seed2.ngd.network:10332",
-		"https://seed2.cityofzion.io:443",
-		"http://seed3.ngd.network:10332",
-		"https://seed3.cityofzion.io:443",
-		"http://seed4.ngd.network:10332",
-		"https://seed4.cityofzion.io:443",
-		"http://seed5.ngd.network:10332",
-		"https://seed5.cityofzion.io:443",
-		"http://seed6.ngd.network:10332",
-		"http://seed7.ngd.network:10332",
-		"http://seed8.ngd.network:10332",
-		"http://seed9.ngd.network:10332",
-		"http://seed10.ngd.network:10332"
+    "nodes": [
+         {
+             "p2p": "main.neologin.io:10333",
+             "rpc": "https://main.neologin.io:443"
+         },
+         {
+             "p2p": "seed5.cityofzion.io:10333",
+             "rpc": "https://seed5.cityofzion.io:443"
+         },
+         {
+             "p2p": "seed5.ngd.network:10333",
+             "rpc": "http://seed5.ngd.network:10332"
+         },
+         {
+             "p2p": "seed4.cityofzion.io:10333",
+             "rpc": "https://seed4.cityofzion.io:443"
+         },
+         {
+             "p2p": "seed4.ngd.network:10333",
+             "rpc": "http://seed4.ngd.network:10332"
+         },
+         {
+             "p2p": "seed3.cityofzion.io:10333",
+             "rpc": "https://seed3.cityofzion.io:443"
+         },
+         {
+             "p2p": "seed3.ngd.network:10333",
+             "rpc": "http://seed3.ngd.network:10332"
+         },
+         {
+             "p2p": "seed2.cityofzion.io:10333",
+             "rpc": "https://seed2.cityofzion.io:443"
+         },
+         {
+             "p2p": "seed2.ngd.network:10333",
+             "rpc": "http://seed2.ngd.network:10332"
+         },
+         {
+             "p2p": "seed1.cityofzion.io:10333",
+             "rpc": "https://seed1.cityofzion.io:443"
+         },
+         {
+             "p2p": "seed1.ngd.network:10333",
+             "rpc": "http://seed1.ngd.network:10332"
+         }
 	],
 	"websocketEventsProvider": "wss://main.neologin.io/ws/",
 	"magic":7630401
