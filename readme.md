@@ -31,6 +31,15 @@ ws.onmessage = (event) => {
 }
 ```
 
+Or, if you use `neon-js`, it's also possible to subscribe to events in the following way:
+```js
+import { api } from "@cityofzion/neon-js";
+const mainNetNotifications = new api.notifications.instance("MainNet");
+const subscription = mainNetNotifications.subscribe("0x314b5aac1cdd01d10661b00886197f2194c3c89b", (event) => {
+  console.log(event); // Print the events being received in real time
+});
+```
+
 You can also check the state of the service at [CoZ Monitor](http://monitor.cityofzion.io/).
 
 Going forward we will continue to host and maintain these servers for the community to use.
