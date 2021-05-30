@@ -11,6 +11,6 @@
   "license": "MIT",
   "dependencies": {
     "redis": "^2.8.0",
-    "ws": "^7.2.1"
+    "ws": "^7.4.6"
   }
 }
